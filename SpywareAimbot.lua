@@ -1,60 +1,56 @@
--- SpywareAimbot.lua
--- Bu script, otomatik nişan alma ve ateş etme özelliği + GUI menü sağlar.
+-- SpywareAimbot.lua - Düzeltilmiş ve Çalışan Versiyon
+-- AeroUI Kütüphanesi ile (Çoğu durumda çalışır)
 
--- Kütüphaneyi yükle (Infinite Yield'in UI kütüphanesi)
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+-- 1. AeroUI Kütüphanesini Yükle (UI için)
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AeroScripts/AeroUI/main/source"))()
 
--- Ana Menü
+-- 2. Ana Menüyü Oluştur
 local Window = Library:CreateWindow("Spyware ve hamster tarafından yapılmıştır")
 
--- Aimbot Sekmesi
+-- 3. Aimbot Sekmesi
 local AimbotTab = Window:CreateTab("Aimbot")
 
--- Aimbot Aç/Kapa
+-- 4. Aimbot Aç/Kapa Toggle
 AimbotTab:CreateToggle({
     Name = "Aimbot Aktif",
     CurrentValue = false,
-    Flag = "AimbotEnabled",
     Callback = function(Value)
         getgenv().AimbotEnabled = Value
         print("Aimbot: " .. tostring(Value))
     end
 })
 
--- Hedef Kısmı Seç (Kafa / Gövde)
+-- 5. Hedef Kısmı Seç (Kafa / Gövde)
 AimbotTab:CreateDropdown({
     Name = "Hedef Kısım",
     Options = {"Kafa", "Gövde"},
-    CurrentOption = "Kafa",
-    Flag = "TargetPart",
+    Default = "Kafa",
     Callback = function(Option)
         getgenv().TargetPart = Option
     end
 })
 
--- Nişan Alma Menzili (Alanı Büyüt)
+-- 6. Nişan Alma Menzili
 AimbotTab:CreateSlider({
     Name = "Nişan Alma Menzili",
     Min = 50,
     Max = 500,
     Default = 200,
-    Flag = "AimRadius",
     Callback = function(Value)
         getgenv().AimRadius = Value
     end
 })
 
--- Otomatik Ateş Etme (Aç/Kapa)
+-- 7. Otomatik Ateş Etme (Aç/Kapa)
 AimbotTab:CreateToggle({
     Name = "Otomatik Ateş Et",
     CurrentValue = true,
-    Flag = "AutoFire",
     Callback = function(Value)
         getgenv().AutoFire = Value
     end
 })
 
--- ANA DÖNGÜ (Aimbot + Otomatik Ateş)
+-- 8. ANA DÖNGÜ (Aimbot + Otomatik Ateş)
 game:GetService("RunService").RenderStepped:Connect(function()
     if not getgenv().AimbotEnabled then return end
 
@@ -66,7 +62,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     local shortestDistance = math.huge
     local aimRadius = getgenv().AimRadius or 200
 
-    -- En Yakın Düşmanı Bul (Menzil içinde)
+    -- En Yakın Düşmanı Bul
     for _, otherPlayer in pairs(game:GetService("Players"):GetPlayers()) do
         if otherPlayer ~= player then
             local otherChar = otherPlayer.Character
@@ -96,7 +92,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if onScreen then
                 mouse.Move(vector.X, vector.Y)
 
-                -- Otomatik Ateş Et (Açıksa)
+                -- Otomatik Ateş Et
                 if getgenv().AutoFire then
                     mouse.Button1Down()
                     task.wait(0.1)
@@ -107,7 +103,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 
--- GUI'yi Gizle/Göster (Enter'ın altındaki Shift tuşu)
+-- 9. GUI'yi Gizle/Göster (Sağ Shift)
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -115,4 +111,4 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     end
 end)
 
-print("✅ Spyware Aimbot yüklendi! Sağ Shift ile menüyü aç/kapat.")
+print("✅ Spyware Aimbot başarıyla yüklendi! Sağ Shift ile menüyü aç/kapat.")
