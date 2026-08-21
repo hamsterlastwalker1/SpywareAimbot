@@ -1,4 +1,4 @@
--- SpywareAimbot.lua - SON VERSİYON (Animasyonlu + Düzenli)
+-- SpywareAimbot.lua - SON VERSİYON (Sadece Title Bar'dan Sürükle)
 -- hamster & spyware tarafından oluşturulmuştur
 
 local TweenService = game:GetService("TweenService")
@@ -27,10 +27,8 @@ mainFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 26)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
-mainFrame.Active = true
-mainFrame.Draggable = true
 
--- ANİMASYON (Başlangıçta küçük ve şeffaf)
+-- ANİMASYON
 mainFrame.Scale = 0.7
 mainFrame.BackgroundTransparency = 0.8
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -40,13 +38,14 @@ tweenScale:Play()
 tweenOpacity:Play()
 
 -- ============================================
--- 2. BAŞLIK ÇUBUĞU
+-- 2. BAŞLIK ÇUBUĞU (SADECE BURADAN SÜRÜKLENECEK)
 -- ============================================
 local titleBar = Instance.new("Frame")
 titleBar.Parent = mainFrame
 titleBar.Size = UDim2.new(1, 0, 0, 50)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 titleBar.BorderSizePixel = 0
+titleBar.ZIndex = 10
 
 -- Başlık
 local titleLabel = Instance.new("TextLabel")
@@ -60,7 +59,7 @@ titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamSemibold
 
--- Alt başlık (hamster & spyware)
+-- Alt başlık
 local subLabel = Instance.new("TextLabel")
 subLabel.Parent = titleBar
 subLabel.Size = UDim2.new(0.85, 0, 0.35, 0)
@@ -87,7 +86,40 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 
 -- ============================================
--- 3. İÇERİK (Kontroller)
+-- 3. SADECE TITLE BAR'DAN SÜRÜKLEME KODU
+-- ============================================
+local dragging = false
+local dragStart = nil
+local frameStart = nil
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        frameStart = mainFrame.Position
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UserInput.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(
+            frameStart.X.Scale,
+            frameStart.X.Offset + delta.X,
+            frameStart.Y.Scale,
+            frameStart.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ============================================
+-- 4. İÇERİK (Kontroller)
 -- ============================================
 local content = Instance.new("Frame")
 content.Parent = mainFrame
@@ -238,20 +270,20 @@ local function createSlider(text, flag, minVal, maxVal, defaultVal, callback)
     valueLabel.Text = tostring(value)
     fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
 
-    local dragging = false
+    local draggingSlider = false
     sliderBg.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
+            draggingSlider = true
         end
     end)
     UserInput.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+            draggingSlider = false
         end
     end)
 
     RunService.RenderStepped:Connect(function()
-        if dragging then
+        if draggingSlider then
             local mousePos = localPlayer:GetMouse().X
             local sliderPos = sliderBg.AbsolutePosition.X
             local sliderSize = sliderBg.AbsoluteSize.X
@@ -268,7 +300,7 @@ local function createSlider(text, flag, minVal, maxVal, defaultVal, callback)
 end
 
 -- ============================================
--- 4. KONTROLLERİ EKLE (Sıralı)
+-- 5. KONTROLLERİ EKLE
 -- ============================================
 local yOffset = 6
 local spacing = 6
@@ -286,7 +318,7 @@ addElement(createToggle("Otomatik Ateş", "AutoFire", true))
 addElement(createToggle("ESP (Takım Renkleri)", "ESPEnabled", true))
 
 -- ============================================
--- 5. AİMBOT
+-- 6. AİMBOT
 -- ============================================
 RunService.RenderStepped:Connect(function()
     if not getgenv().AimbotEnabled then return end
@@ -335,7 +367,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================
--- 6. ESP (Takım Renkleri)
+-- 7. ESP (Takım Renkleri)
 -- ============================================
 RunService.RenderStepped:Connect(function()
     if getgenv().ESPEnabled then
@@ -385,7 +417,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================
--- 7. SAĞ SHIFT İLE AÇ/KAPA
+-- 8. SAĞ SHIFT İLE AÇ/KAPA
 -- ============================================
 local menuVisible = true
 UserInput.InputBegan:Connect(function(input, gameProcessed)
